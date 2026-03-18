@@ -1,26 +1,48 @@
-name: CI - Build & Push Images
+name: CI - Build Changed Services
 
 on:
   push:
     branches: [main]
-
-permissions:
-  contents: write
+  workflow_dispatch:
 
 jobs:
-
-  api:
-    name: Build API Image
+  # 🔍 Step 1: Detect changes
+  changes:
     runs-on: ubuntu-latest
-    if: contains(join(github.event.commits.*.modified, ','), 'api-service/')
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+    outputs:
+      api: ${{ steps.filter.outputs.api }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      model: ${{ steps.filter.outputs.model }}
 
-      - name: Determine version
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect changed paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            api:
+              - 'api-service/**'
+            frontend:
+              - 'frontend-service/**'
+            model:
+              - 'model-service/**'
+
+  # 🟡 Step 2: Build API
+  api:
+    name: Build API
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set version
         id: version
-        run: echo "VERSION=${{ github.sha }}" >> $GITHUB_OUTPUT
+        run: echo "VERSION=${GITHUB_SHA}" >> $GITHUB_OUTPUT
 
       - name: Docker login
         uses: docker/login-action@v3
@@ -28,7 +50,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build & push API image
+      - name: Build & push API
         uses: docker/build-push-action@v6
         with:
           context: ./api-service
@@ -37,18 +59,19 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/k8s_api_service:${{ steps.version.outputs.VERSION }}
             ${{ secrets.DOCKER_USERNAME }}/k8s_api_service:latest
 
+  # 🔵 Step 3: Build Frontend
   frontend:
-    name: Build Frontend Image
+    name: Build Frontend
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
-    if: contains(join(github.event.commits.*.modified, ','), 'frontend-service/')
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
-      - name: Determine version
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set version
         id: version
-        run: echo "VERSION=${{ github.sha }}" >> $GITHUB_OUTPUT
+        run: echo "VERSION=${GITHUB_SHA}" >> $GITHUB_OUTPUT
 
       - name: Docker login
         uses: docker/login-action@v3
@@ -56,7 +79,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build & push Frontend image
+      - name: Build & push Frontend
         uses: docker/build-push-action@v6
         with:
           context: ./frontend-service
@@ -65,18 +88,19 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/k8s_frontend_service:${{ steps.version.outputs.VERSION }}
             ${{ secrets.DOCKER_USERNAME }}/k8s_frontend_service:latest
 
+  # 🟢 Step 4: Build Model
   model:
-    name: Build Model Image
+    name: Build Model
+    needs: changes
+    if: needs.changes.outputs.model == 'true'
     runs-on: ubuntu-latest
-    if: contains(join(github.event.commits.*.modified, ','), 'model-service/')
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
-      - name: Determine version
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set version
         id: version
-        run: echo "VERSION=${{ github.sha }}" >> $GITHUB_OUTPUT
+        run: echo "VERSION=${GITHUB_SHA}" >> $GITHUB_OUTPUT
 
       - name: Docker login
         uses: docker/login-action@v3
@@ -84,7 +108,124 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build & push Model image
+      - name: Build & push Model
+        uses: docker/build-push-action@v6
+        with:
+          context: ./model-service
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/k8s_model_service:${{ steps.version.outputs.VERSION }}
+            ${{ secrets.DOCKER_USERNAME }}/k8s_model_service:latestname: CI - Build Changed Services
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  # 🔍 Step 1: Detect changes
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      api: ${{ steps.filter.outputs.api }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      model: ${{ steps.filter.outputs.model }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect changed paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            api:
+              - 'api-service/**'
+            frontend:
+              - 'frontend-service/**'
+            model:
+              - 'model-service/**'
+
+  # 🟡 Step 2: Build API
+  api:
+    name: Build API
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set version
+        id: version
+        run: echo "VERSION=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+
+      - name: Docker login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build & push API
+        uses: docker/build-push-action@v6
+        with:
+          context: ./api-service
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/k8s_api_service:${{ steps.version.outputs.VERSION }}
+            ${{ secrets.DOCKER_USERNAME }}/k8s_api_service:latest
+
+  # 🔵 Step 3: Build Frontend
+  frontend:
+    name: Build Frontend
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set version
+        id: version
+        run: echo "VERSION=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+
+      - name: Docker login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build & push Frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend-service
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/k8s_frontend_service:${{ steps.version.outputs.VERSION }}
+            ${{ secrets.DOCKER_USERNAME }}/k8s_frontend_service:latest
+
+  # 🟢 Step 4: Build Model
+  model:
+    name: Build Model
+    needs: changes
+    if: needs.changes.outputs.model == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set version
+        id: version
+        run: echo "VERSION=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+
+      - name: Docker login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build & push Model
         uses: docker/build-push-action@v6
         with:
           context: ./model-service
