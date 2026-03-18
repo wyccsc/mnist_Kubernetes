@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-service
+  labels:
+    app: api-service
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: api-service
+
+  template:
+    metadata:
+      labels:
+        app: api-service
+
+    spec:
+      containers:
+        - name: api-service
+          image: wyccsc/k8s_api_service:API_TAG
+          ports:
+            - containerPort: 8000
+
+          env:
+            - name: MODEL_SERVICE_URL
+              value: "http://model-service:8000"
+          imagePullPolicy: Always

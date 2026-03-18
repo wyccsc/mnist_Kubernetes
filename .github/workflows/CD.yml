@@ -1,0 +1,48 @@
+name: CD - Deploy to Kubernetes
+
+on:
+  workflow_run:
+    workflows: ["CI - Build & Push Images"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+
+    # 只有在 CI 完成且成功時執行
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      # 1. Checkout so we have your k8s manifests
+      - uses: actions/checkout@v3
+
+      # 2. Setup kubectl in the runner
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+
+      # 3. Provide kubeconfig for authentication
+      - name: Set kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+
+      # 4. Update the image tag for deployments
+      - name: Update K8s images
+        run: |
+          kubectl set image deployment/api-deployment api=${{ secrets.DOCKER_USERNAME }}/k8s_api_service:${{ github.event.workflow_run.head_commit.id }}
+          kubectl set image deployment/frontend-deployment frontend=${{ secrets.DOCKER_USERNAME }}/k8s_frontend_service:${{ github.event.workflow_run.head_commit.id }}
+          kubectl set image deployment/model-deployment model=${{ secrets.DOCKER_USERNAME }}/k8s_model_service:${{ github.event.workflow_run.head_commit.id }}
+
+      # 5. Apply other k8s resource changes if needed
+      - name: Apply Kubernetes manifests
+        run: |
+          kubectl apply -f k8s/
+
+      # 6. Wait for rollout to finish
+      - name: Check deployment rollout
+        run: |
+          kubectl rollout status deployment/api-deployment
+          kubectl rollout status deployment/frontend-deployment
+          kubectl rollout status deployment/model-deployment

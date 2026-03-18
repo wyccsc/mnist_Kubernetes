@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-service
+  labels:
+    app: frontend-service
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: frontend-service
+
+  template:
+    metadata:
+      labels:
+        app: frontend-service
+
+    spec:
+      containers:
+        - name: frontend-service
+          image: wyccsc/k8s_frontend_service:API_TAG
+          ports:
+            - containerPort: 80
+
+          env:
+            - name: API_SERVICE_URL
+              value: "http://api-service:8000"
+              
+          imagePullPolicy: Always
