@@ -2,7 +2,7 @@ name: CD - Deploy to Kubernetes
 
 on:
   workflow_run:
-    workflows: ["CI - Build & Push Images"]
+    workflows: ["CI - Build Changed Services"]
     types:
       - completed
 
