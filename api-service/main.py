@@ -15,7 +15,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-MODEL_URL = "http://model-service:8000/predict"
+MODEL_URL = "http://10.106.243.131:8000/predict"
 RESULT_FILE = "predictions.csv"
 
 @app.post("/upload_predict")
