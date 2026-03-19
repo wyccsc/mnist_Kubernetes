@@ -15,8 +15,7 @@ jobs:
       model: ${{ steps.filter.outputs.model }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Detect changed paths
         uses: dorny/paths-filter@v3
@@ -30,7 +29,7 @@ jobs:
             model:
               - 'model-service/**'
 
-  # 🟡 Step 2: Build API
+  # 🟡 API
   api:
     name: Build API
     needs: changes
@@ -39,10 +38,31 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Set version
-        id: version
-        run: echo "VERSION=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+      - name: Calculate version
+        id: bump
+        run: |
+          git fetch --tags
+          LAST=$(git tag --list "api-*" | sort -V | tail -n1 || echo "")
+
+          if [ -z "$LAST" ]; then
+            NEW="1.0.0"
+          else
+            BASE=${LAST#api-}
+            PATCH=$(echo $BASE | awk -F. '{print $3+1}')
+            NEW="$(echo $BASE | awk -F. '{print $1"."$2}').$PATCH"
+          fi
+
+          echo "VERSION=$NEW" >> $GITHUB_OUTPUT
+
+      - name: Create tag
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git tag api-${{ steps.bump.outputs.VERSION }}
+          git push origin api-${{ steps.bump.outputs.VERSION }}
 
       - name: Docker login
         uses: docker/login-action@v3
@@ -56,10 +76,10 @@ jobs:
           context: ./api-service
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/k8s_api_service:${{ steps.version.outputs.VERSION }}
+            ${{ secrets.DOCKER_USERNAME }}/k8s_api_service:${{ steps.bump.outputs.VERSION }}
             ${{ secrets.DOCKER_USERNAME }}/k8s_api_service:latest
 
-  # 🔵 Step 3: Build Frontend
+  # 🔵 Frontend
   frontend:
     name: Build Frontend
     needs: changes
@@ -68,10 +88,31 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Set version
-        id: version
-        run: echo "VERSION=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+      - name: Calculate version
+        id: bump
+        run: |
+          git fetch --tags
+          LAST=$(git tag --list "frontend-*" | sort -V | tail -n1 || echo "")
+
+          if [ -z "$LAST" ]; then
+            NEW="1.0.0"
+          else
+            BASE=${LAST#frontend-}
+            PATCH=$(echo $BASE | awk -F. '{print $3+1}')
+            NEW="$(echo $BASE | awk -F. '{print $1"."$2}').$PATCH"
+          fi
+
+          echo "VERSION=$NEW" >> $GITHUB_OUTPUT
+
+      - name: Create tag
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git tag frontend-${{ steps.bump.outputs.VERSION }}
+          git push origin frontend-${{ steps.bump.outputs.VERSION }}
 
       - name: Docker login
         uses: docker/login-action@v3
@@ -85,10 +126,10 @@ jobs:
           context: ./frontend-service
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/k8s_frontend_service:${{ steps.version.outputs.VERSION }}
+            ${{ secrets.DOCKER_USERNAME }}/k8s_frontend_service:${{ steps.bump.outputs.VERSION }}
             ${{ secrets.DOCKER_USERNAME }}/k8s_frontend_service:latest
 
-  # 🟢 Step 4: Build Model
+  # 🟢 Model
   model:
     name: Build Model
     needs: changes
@@ -97,10 +138,31 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Set version
-        id: version
-        run: echo "VERSION=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+      - name: Calculate version
+        id: bump
+        run: |
+          git fetch --tags
+          LAST=$(git tag --list "model-*" | sort -V | tail -n1 || echo "")
+
+          if [ -z "$LAST" ]; then
+            NEW="1.0.0"
+          else
+            BASE=${LAST#model-}
+            PATCH=$(echo $BASE | awk -F. '{print $3+1}')
+            NEW="$(echo $BASE | awk -F. '{print $1"."$2}').$PATCH"
+          fi
+
+          echo "VERSION=$NEW" >> $GITHUB_OUTPUT
+
+      - name: Create tag
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git tag model-${{ steps.bump.outputs.VERSION }}
+          git push origin model-${{ steps.bump.outputs.VERSION }}
 
       - name: Docker login
         uses: docker/login-action@v3
@@ -114,5 +176,5 @@ jobs:
           context: ./model-service
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/k8s_model_service:${{ steps.version.outputs.VERSION }}
+            ${{ secrets.DOCKER_USERNAME }}/k8s_model_service:${{ steps.bump.outputs.VERSION }}
             ${{ secrets.DOCKER_USERNAME }}/k8s_model_service:latest
