@@ -22,6 +22,10 @@
 </button>
 
 <script>
+const API_URL = "http://192.168.49.2:30080";  // 用 minikube ip + NodePort
+// 例如 minikube ip = 192.168.49.2
+// api-service NodePort = 30080
+// => http://192.168.49.2:30080
 
 async function uploadCSV(){
 
@@ -35,7 +39,7 @@ async function uploadCSV(){
     const formData = new FormData();
     formData.append("datafile",file);
 
-    const res = await fetch("http://api-service:8000/upload_predict",{
+    const res = await fetch(`${API_URL}/upload_predict`,{
         method:"POST",
         body:formData
     });
@@ -49,11 +53,8 @@ async function uploadCSV(){
 }
 
 function downloadResult(){
-
-    window.location.href="http://api-service:8000/download";
-
+    window.location.href=`${API_URL}/download`;
 }
-
 </script>
 
 </body>

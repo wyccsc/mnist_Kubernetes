@@ -7,14 +7,16 @@ import io
 
 app = FastAPI()
 
+# CORS 設定允許所有
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=["*"],   
+    allow_methods=["*"],   
+    allow_headers=["*"],  
+    expose_headers=["*"]  
 )
 
+# 指向 Kubernetes service
 MODEL_URL = "http://model-service:8000/predict"
 RESULT_FILE = "predictions.csv"
 
@@ -33,17 +35,14 @@ async def upload_predict(datafile: UploadFile = File(...)):
     result = response.json()
     labels = result["labels"]
 
-    # 產生 IMAGE 名稱
-    # 假設你想要 image_1, image_2, image_3...
+    # 建出 IMAGE 名稱
     image_names = [f"image_{i+1}" for i in range(len(labels))]
 
-    # 組成輸出資料表
+    # 輸出
     df_output = pd.DataFrame({
         "IMAGE": image_names,
         "LABEL": labels
     })
-
-    # 儲存 predictions CSV
     df_output.to_csv(RESULT_FILE, index=False)
 
     return {"labels": labels}
