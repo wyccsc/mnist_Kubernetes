@@ -17,7 +17,7 @@ app.add_middleware(
 )
 
 # 指向 Kubernetes service
-MODEL_URL = "http://localhost:8000/predict"
+MODEL_URL = "http://localhost:7000/predict"
 RESULT_FILE = "predictions.csv"
 
 @app.post("/upload_predict")
