@@ -20,11 +20,10 @@ spec:
     spec:
       containers:
         - name: api-service
-          image: wyccsc/k8s_api_service:API_TAG
+          image: wyccsc/k8s_api_service:1.0.0
           ports:
             - containerPort: 8000
 
           env:
             - name: MODEL_SERVICE_URL
               value: "http://model-service:8000"
-          imagePullPolicy: Always

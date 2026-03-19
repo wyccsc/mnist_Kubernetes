@@ -15,7 +15,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-MODEL_URL = "http://mnist_microservice_model_service:8000/predict"
+MODEL_URL = "http://model-service:8000/predict"
 RESULT_FILE = "predictions.csv"
 
 @app.post("/upload_predict")

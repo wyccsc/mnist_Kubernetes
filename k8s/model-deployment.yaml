@@ -18,7 +18,6 @@ spec:
     spec:
       containers:
         - name: model-service
-          image: wyccsc/k8s_model_service:API_TAG
+          image: wyccsc/k8s_model_service:1.0.0
           ports:
             - containerPort: 8000
-          imagePullPolicy: Always
