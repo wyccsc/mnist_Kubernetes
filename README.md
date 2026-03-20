@@ -2,19 +2,12 @@
 
 This project demonstrates how to deploy a pre-trained MNIST model on Kubernetes and perform inference in a local development environment using Minikube.
 
-## Architecture
+## Components
 
-* Pre-trained MNIST model
-* Dockerized inference service
-* Kubernetes Deployment / Service (Minikube cluster)
-* Client request → Prediction result
-
-## How It Works
-
-1. Load a pre-trained MNIST model
-2. Expose an inference API
-3. Deploy the service to a Kubernetes cluster (Minikube)
-4. Send input data and receive a prediction result
+* Frontend Service
+* Inference API
+* Model Service
+* Kubernetes (Minikube)
 
 ## Prerequisites
 
