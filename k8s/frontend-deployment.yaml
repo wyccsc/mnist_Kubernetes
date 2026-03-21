@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: frontend-service
-          image: wyccsc/k8s_frontend_service:1.0.7
+          image: wyccsc/k8s_frontend_service:1.0.8
           ports:
             - containerPort: 80
 
