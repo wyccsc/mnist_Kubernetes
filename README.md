@@ -62,3 +62,7 @@ Minikube is used to simulate a local Kubernetes cluster for development and test
 
 This project uses Minikube, which runs a local single-node Kubernetes cluster for development and experimentation.
 In a production environment, a multi-node Kubernetes cluster would be required for scalability and high availability.
+
+## Other
+
+Dataset: [Kaggle Digit Recognizer](https://www.kaggle.com/competitions/digit-recognizer/data)
