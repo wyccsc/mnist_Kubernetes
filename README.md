@@ -20,7 +20,7 @@ This project demonstrates how to deploy a pre-trained MNIST model on Kubernetes 
 ### Start Minikube cluster
 
 ```bash
-minikube start
+minikube start --driver=docker
 ```
 
 ### Build Docker image
