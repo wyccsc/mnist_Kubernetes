@@ -1,4 +1,4 @@
-# MNIST Inference on Kubernetes 
+# Kubernetes Deployment with Minikube
 
 This project focuses on practicing deployment on Kubernetes using Minikube in a local development environment.
 
