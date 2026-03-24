@@ -48,9 +48,9 @@ Open your browser and navigate to:
 
 http://localhost:8080
 
-Upload data from the dataset/folder.csv
+Upload data 
 
-The system will return the predicted digit
+The system will return the predicted result
 
 ## Motivation
 
