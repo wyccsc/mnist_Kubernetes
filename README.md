@@ -1,6 +1,6 @@
 # MNIST Inference on Kubernetes 
 
-This project demonstrates how to deploy a pre-trained MNIST model on Kubernetes and perform inference in a local development environment using Minikube.
+This project focuses on practicing deployment on Kubernetes using Minikube in a local development environment.
 
 ## Components
 
