@@ -1,6 +1,6 @@
 # Kubernetes Deployment with Minikube
 
-This project focuses on practicing deployment on Kubernetes using Minikube in a local development environment.
+This project demonstrates how to deploy an application on Kubernetes using Minikube in a local development environment.
 
 ## Components
 
